@@ -9,7 +9,7 @@ use crossterm::{
     terminal,
 };
 
-use crate::{enemy::Enemy, player::Player, projectile::Projectile, render::RenderBuffer, Team};
+use crate::{enemy::Enemy, player::Player, projectile::Projectile, render::RenderBuffer};
 
 pub struct GameState {
     pub(crate) running: bool,
@@ -98,9 +98,5 @@ impl GameState {
             }
             _ => false,
         }
-    }
-
-    fn spawn_projectile(&mut self, p: Projectile) {
-        self.projectiles.push(p);
     }
 }

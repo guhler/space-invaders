@@ -35,6 +35,7 @@ impl Enemy {
             }
             gs.enemies[i].pos.0 += gs.enemies[i].vel.0;
             gs.enemies[i].pos.1 += gs.enemies[i].vel.1;
+            i += 1;
         }
     }
 

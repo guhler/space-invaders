@@ -20,10 +20,10 @@ pub struct Player {
 impl Player {
     #[rustfmt::skip]
     const SHIP: &'static [&'static str] = &[
-        r"  /\  ", 
-        r" /__\ ", 
-        r"| __ |", 
-        r"|/  \|"
+        r"  /\  ",
+        r" /__\ ",
+        r"| __ |",
+        r"|/  \|",
     ];
 
     const MAX_VEL_X: f32 = 2.0;
@@ -55,7 +55,7 @@ impl Player {
             // if !Self::collides_with_enemies(gs) {
             // break;
             // }
-            i -= 1;
+            //i -= 1;
         }
 
         if i < 10 {
@@ -134,10 +134,12 @@ impl Player {
     }
 
     fn spawn_projectiles(&self) -> Vec<Projectile> {
+        let pos_x = self.pos.0 + Self::SHIP[0].len() as f32 / 2.0 - 0.5;
+        let pos_y = self.pos.1;
         vec![
-            Projectile::new(self.pos.0 + 3.0, self.pos.1, 0.0, -2.0, Team::Player),
-            Projectile::new(self.pos.0 + 3.0, self.pos.1, -2.0, -2.0, Team::Player),
-            Projectile::new(self.pos.0 + 3.0, self.pos.1, 2.0, -2.0, Team::Player),
+            Projectile::new(pos_x, pos_y, 0.0, -2.0, Team::Player),
+            Projectile::new(pos_x, pos_y, -2.0, -2.0, Team::Player),
+            Projectile::new(pos_x, pos_y, 2.0, -2.0, Team::Player),
         ]
     }
 
@@ -146,22 +148,23 @@ impl Player {
     }
 
     fn check_walls(gs: &mut GameState) {
-        println!("{}", gs.player.pos.1);
         let (w, h) = terminal::size().unwrap();
         let (w, h) = (
             w as usize - Self::SHIP[0].len(),
             h as usize - Self::SHIP.len(),
         );
-        if !(0.0..=w as f32).contains(&gs.player.pos.0) {
+        let range_x = 0.0..=w as f32;
+        let range_y = 0.0..=h as f32;
+        if !range_x.contains(&gs.player.pos.0) {
             gs.player.vel.0 = 0.0;
             gs.player.acc.0 = 0.0;
         }
-        if !(0.0..=h as f32).contains(&gs.player.pos.1) {
+        if !range_y.contains(&gs.player.pos.1) {
             gs.player.vel.1 = 0.0;
             gs.player.acc.1 = 0.0;
         }
-        gs.player.pos.0 = gs.player.pos.0.clamp(0.0, w as f32);
-        gs.player.pos.1 = gs.player.pos.1.clamp(0.0, w as f32);
+        gs.player.pos.0 = gs.player.pos.0.clamp(*range_x.start(), *range_x.end());
+        gs.player.pos.1 = gs.player.pos.1.clamp(*range_y.start(), *range_y.end());
     }
 
     fn take_damage(&mut self) {

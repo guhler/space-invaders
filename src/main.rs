@@ -7,7 +7,7 @@ fn main() {
     terminal::enter();
     let _ = execute!(
         stdout(),
-        style::SetBackgroundColor(style::Color::Rgb { r: 0, g: 0, b: 15 }),
+        style::SetBackgroundColor(style::Color::Rgb { r: 0, g: 0, b: 15 })
     );
 
     let hook = std::panic::take_hook();
@@ -15,7 +15,6 @@ fn main() {
         terminal::exit();
         hook(info);
     }));
-
     let game = space_invaders::game::GameState::new();
     game.run();
 
