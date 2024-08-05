@@ -100,3 +100,33 @@ impl GameState {
         }
     }
 }
+
+pub(crate) fn shapes_collide(
+    a: &[&str],
+    pos_a: (usize, usize),
+    b: &[&str],
+    pos_b: (usize, usize),
+) -> bool {
+    for (ay, row) in a.iter().enumerate() {
+        for (ax, ac) in row.chars().enumerate() {
+            if ac == ' ' {
+                continue;
+            }
+            for (by, row) in b.iter().enumerate() {
+                for (bx, bc) in row.chars().enumerate() {
+                    if bc == ' ' {
+                        continue;
+                    }
+                    let pos_ax = ax + pos_a.0;
+                    let pos_ay = ay + pos_a.1;
+                    let pos_bx = bx + pos_b.0;
+                    let pos_by = by + pos_b.1;
+                    if pos_ax == pos_bx && pos_ay == pos_by {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    false
+}

@@ -4,17 +4,28 @@ use crossterm::{
     terminal,
 };
 
-use crate::{game::GameState, projectile::Projectile, render::RenderBuffer, Team};
+use crate::{
+    enemy::Enemy,
+    game::{self, GameState},
+    projectile::Projectile,
+    render::RenderBuffer,
+    Team,
+};
 
 pub struct Player {
+    // game logic
     pos: (f32, f32),
     vel: (f32, f32),
     acc: (f32, f32),
+    hp: u16,
     reload_time: u8,
+    // input logic
     left_arrow_down: bool,
     right_arrow_down: bool,
     up_arrow_down: bool,
     down_arrow_down: bool,
+    // animation logic
+    hurt: bool,
 }
 
 impl Player {
@@ -30,17 +41,22 @@ impl Player {
     const MAX_VEL_Y: f32 = 1.0;
 
     const PROJECTILE_COOLDOWN: u8 = 10;
+    const START_HP: u16 = 100;
 
     pub fn new() -> Self {
         Self {
             pos: (0.0, 0.0),
             vel: (0.0, 0.0),
             acc: (0.0, 0.0),
+            hp: Self::START_HP,
             reload_time: Self::PROJECTILE_COOLDOWN,
+
             left_arrow_down: false,
             right_arrow_down: false,
             up_arrow_down: false,
             down_arrow_down: false,
+
+            hurt: false,
         }
     }
 
@@ -51,20 +67,17 @@ impl Player {
         while i >= 0 {
             gs.player.pos.0 = pos.0 + vel.0 * i as f32 / 10.0;
             gs.player.pos.1 = pos.1 + vel.1 * i as f32 / 10.0;
-            break;
-            // if !Self::collides_with_enemies(gs) {
-            // break;
-            // }
-            //i -= 1;
+            if !Self::collides_with_enemies(gs) {
+                break;
+            }
+            i -= 1;
         }
 
         if i < 10 {
-            // gs.player.take_damage();
-        }
-        if i == 0 {
-            println!("Player stuck");
+            gs.player.take_damage();
         }
 
+        // vel / acc calculation
         gs.player.vel.0 += gs.player.acc.0;
         gs.player.vel.0 = gs.player.vel.0.clamp(-Self::MAX_VEL_X, Self::MAX_VEL_X);
         gs.player.acc.0 = match (gs.player.left_arrow_down, gs.player.right_arrow_down) {
@@ -105,13 +118,17 @@ impl Player {
     pub fn render(&mut self, buffer: &mut RenderBuffer) {
         for (y, row) in Self::SHIP.iter().enumerate() {
             for (x, c) in row.chars().enumerate() {
+                if c == ' ' {
+                    continue;
+                }
                 let pos_x = x + self.pos.0 as usize;
                 let pos_y = y + self.pos.1 as usize;
                 if pos_x < buffer.width as usize && pos_y < buffer.height as usize {
-                    buffer[pos_x][pos_y] = c.stylize();
+                    buffer[pos_x][pos_y] = if self.hurt { c.red() } else { c.stylize() }
                 }
             }
         }
+        self.hurt = false;
     }
 
     pub fn handle_input(&mut self, event: &Event) {
@@ -144,7 +161,14 @@ impl Player {
     }
 
     fn collides_with_enemies(gs: &mut GameState) -> bool {
-        todo!()
+        for i in 0..gs.enemies.len() {
+            let ppos = (gs.player.pos.0 as usize, gs.player.pos.1 as usize);
+            let epos = (gs.enemies[i].pos.0 as usize, gs.enemies[i].pos.1 as usize);
+            if game::shapes_collide(Player::SHIP, ppos, Enemy::SHAPE, epos) {
+                return true;
+            }
+        }
+        false
     }
 
     fn check_walls(gs: &mut GameState) {
@@ -168,6 +192,9 @@ impl Player {
     }
 
     fn take_damage(&mut self) {
-        todo!()
+        if self.hp > 0 {
+            self.hp -= 1;
+        }
+        self.hurt = true;
     }
 }

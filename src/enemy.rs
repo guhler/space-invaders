@@ -3,15 +3,15 @@ use crossterm::style::Stylize;
 use crate::{game::GameState, render::RenderBuffer};
 
 pub struct Enemy {
-    pos: (f32, f32),
-    vel: (f32, f32),
-    hp: u16,
-    alive: bool,
+    pub pos: (f32, f32),
+    pub vel: (f32, f32),
+    pub hp: u16,
+    pub alive: bool,
 }
 
 impl Enemy {
     #[rustfmt::skip]
-    const SHAPE: &'static [&'static str] = &[ 
+    pub const SHAPE: &'static [&'static str] = &[ 
         " ▄▄▄▄▄ ", 
         "█     █", 
         "█▄█ █▄█", 
