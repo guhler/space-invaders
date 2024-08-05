@@ -14,11 +14,11 @@ use crate::{
 
 pub struct Player {
     // game logic
-    pos: (f32, f32),
-    vel: (f32, f32),
-    acc: (f32, f32),
-    hp: u16,
-    reload_time: u8,
+    pub pos: (f32, f32),
+    pub vel: (f32, f32),
+    pub acc: (f32, f32),
+    pub hp: u16,
+    pub reload_time: u8,
     // input logic
     left_arrow_down: bool,
     right_arrow_down: bool,
@@ -30,7 +30,7 @@ pub struct Player {
 
 impl Player {
     #[rustfmt::skip]
-    const SHIP: &'static [&'static str] = &[
+    pub const SHIP: &'static [&'static str] = &[
         r"  /\  ",
         r" /__\ ",
         r"| __ |",
@@ -191,7 +191,7 @@ impl Player {
         gs.player.pos.1 = gs.player.pos.1.clamp(*range_y.start(), *range_y.end());
     }
 
-    fn take_damage(&mut self) {
+    pub fn take_damage(&mut self) {
         if self.hp > 0 {
             self.hp -= 1;
         }

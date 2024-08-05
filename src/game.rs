@@ -79,7 +79,7 @@ impl GameState {
 
         self.projectiles.iter().for_each(|p| p.render(&mut buffer));
 
-        self.enemies.iter().for_each(|e| e.render(&mut buffer));
+        self.enemies.iter_mut().for_each(|e| e.render(&mut buffer));
 
         self.player.render(&mut buffer);
 
