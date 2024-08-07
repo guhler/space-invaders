@@ -30,10 +30,11 @@ impl Projectile {
             gs.projectiles[i].pos.0 += gs.projectiles[i].vel.0;
             gs.projectiles[i].pos.1 += gs.projectiles[i].vel.1;
 
-            Self::check_hits(gs, i);
+            let remove = Self::check_hits(gs, i);
 
             let (w, h) = terminal::size().unwrap();
-            if !(0.0..w as f32 - 1.0).contains(&gs.projectiles[i].pos.0)
+            if remove
+                || !(0.0..w as f32 - 1.0).contains(&gs.projectiles[i].pos.0)
                 || !(0.0..h as f32 - 1.0).contains(&gs.projectiles[i].pos.1)
             {
                 gs.projectiles.remove(i);
@@ -43,7 +44,7 @@ impl Projectile {
         }
     }
 
-    fn check_hits(gs: &mut GameState, i: usize) {
+    fn check_hits(gs: &mut GameState, i: usize) -> bool {
         let pos = (
             gs.projectiles[i].pos.0 as usize,
             gs.projectiles[i].pos.1 as usize,
@@ -53,6 +54,9 @@ impl Projectile {
                 let ppos = (gs.player.pos.0 as usize, gs.player.pos.1 as usize);
                 if game::shapes_collide(&["-"], pos, Player::SHIP, ppos) {
                     gs.player.take_damage();
+                    true
+                } else {
+                    false
                 }
             }
             Team::Player => {
@@ -60,8 +64,10 @@ impl Projectile {
                     let epos = (gs.enemies[j].pos.0 as usize, gs.enemies[j].pos.1 as usize);
                     if game::shapes_collide(&["-"], pos, Enemy::SHAPE, epos) {
                         gs.enemies[j].take_damage();
+                        return true;
                     }
                 }
+                false
             }
         }
     }
@@ -71,8 +77,7 @@ impl Projectile {
             -0.5..=0.5 => '-',
             0.5..=4.0 => '\\',
             -4.0..=-0.5 => '/',
-            (4.0..) | (..=-4.0) => '|',
-            _ => panic!("Unexpected slope"),
+            _ => '|',
         };
 
         if self.pos.0 >= 0.0
