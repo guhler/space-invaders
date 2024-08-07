@@ -197,4 +197,8 @@ impl Player {
         }
         self.hurt = true;
     }
+
+    pub fn is_alive(&self) -> bool {
+        self.hp > 0
+    }
 }

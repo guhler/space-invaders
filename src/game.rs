@@ -6,6 +6,7 @@ use std::{
 
 use crossterm::{
     event::{self, Event, KeyCode, KeyEvent},
+    style::Stylize,
     terminal,
 };
 
@@ -13,14 +14,16 @@ use crate::{
     enemy::{Enemy, MovementPattern},
     player::Player,
     projectile::Projectile,
-    render::RenderBuffer,
+    render::{RenderBuffer, TextAlign, TextElement},
 };
 
 pub struct GameState {
+    // game logic
     pub(crate) running: bool,
     pub(crate) player: Player,
     pub(crate) projectiles: Vec<Projectile>,
     pub(crate) enemies: Vec<Enemy>,
+    // animation
 }
 
 impl GameState {
@@ -58,7 +61,11 @@ impl GameState {
             let start = Instant::now();
 
             self.update();
-            self.render();
+
+            let (w, h) = terminal::size().unwrap();
+            let mut buf = RenderBuffer::new(w, h);
+            self.render(&mut buf);
+            thread::spawn(move || buf.render());
 
             while self.running && Instant::now() - start < Self::TICK_LENGTH {
                 match receiver.try_recv() {
@@ -72,29 +79,57 @@ impl GameState {
                 }
             }
         }
+
+        loop {
+            let (w, h) = terminal::size().unwrap();
+            let mut buf = RenderBuffer::new(w, h);
+            self.render(&mut buf);
+
+            let game_over_display = TextElement::new(
+                "--- Game Over ---".red(),
+                (w as u16 / 2, h as u16 / 2),
+                TextAlign::Center,
+            );
+            game_over_display.render(&mut buf);
+            buf.render();
+
+            match receiver.try_recv() {
+                Ok(Event::Key(KeyEvent {
+                    code: KeyCode::Esc, ..
+                }))
+                | Err(mpsc::TryRecvError::Disconnected) => break,
+                _ => (),
+            }
+        }
     }
 
     fn update(&mut self) {
         Player::update(self);
+        if !self.player.is_alive() {
+            self.running = false;
+        }
 
         Enemy::update(self);
 
         Projectile::update(self);
     }
 
-    fn render(&mut self) {
+    fn render(&mut self, buffer: &mut RenderBuffer) {
         let (w, h) = terminal::size().unwrap();
-        let mut buffer = RenderBuffer::new(w, h);
 
-        self.projectiles.iter().for_each(|p| p.render(&mut buffer));
+        self.projectiles.iter().for_each(|p| p.render(buffer));
 
-        self.enemies.iter_mut().for_each(|e| e.render(&mut buffer));
+        self.enemies.iter_mut().for_each(|e| e.render(buffer));
 
-        self.player.render(&mut buffer);
+        self.player.render(buffer);
 
-        thread::spawn(move || {
-            buffer.render();
-        });
+        let hp_str = self.player.hp.to_string();
+        let hp_display = TextElement::new(
+            hp_str.as_str().red(),
+            (w as u16 - 1, h as u16 - 1),
+            TextAlign::Right,
+        );
+        hp_display.render(buffer);
     }
 
     fn handle_input(&mut self, event: &Event) -> bool {
