@@ -40,7 +40,7 @@ impl Player {
     const MAX_VEL_X: f32 = 2.0;
     const MAX_VEL_Y: f32 = 1.0;
 
-    const PROJECTILE_COOLDOWN: u8 = 10;
+    const PROJECTILE_COOLDOWN: u8 = 5;
     const START_HP: u16 = 100;
 
     pub fn new() -> Self {
@@ -182,13 +182,13 @@ impl Player {
         if !range_x.contains(&gs.player.pos.0) {
             gs.player.vel.0 = 0.0;
             gs.player.acc.0 = 0.0;
+            gs.player.pos.0 = gs.player.pos.0.clamp(*range_x.start(), *range_x.end());
         }
         if !range_y.contains(&gs.player.pos.1) {
             gs.player.vel.1 = 0.0;
             gs.player.acc.1 = 0.0;
+            gs.player.pos.1 = gs.player.pos.1.clamp(*range_y.start(), *range_y.end());
         }
-        gs.player.pos.0 = gs.player.pos.0.clamp(*range_x.start(), *range_x.end());
-        gs.player.pos.1 = gs.player.pos.1.clamp(*range_y.start(), *range_y.end());
     }
 
     pub fn take_damage(&mut self) {

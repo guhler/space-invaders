@@ -9,7 +9,12 @@ use crossterm::{
     terminal,
 };
 
-use crate::{enemy::Enemy, player::Player, projectile::Projectile, render::RenderBuffer};
+use crate::{
+    enemy::{Enemy, MovementPattern},
+    player::Player,
+    projectile::Projectile,
+    render::RenderBuffer,
+};
 
 pub struct GameState {
     pub(crate) running: bool,
@@ -22,11 +27,15 @@ impl GameState {
     const TICK_LENGTH: Duration = Duration::from_millis(25);
 
     pub fn new() -> Self {
+        let movement_pattern = MovementPattern::BackForth {
+            going_left: true,
+            down: 0,
+        };
         Self {
             running: false,
             player: Player::new(),
             projectiles: vec![],
-            enemies: vec![Enemy::new(10.0, 0.0, 7)],
+            enemies: vec![Enemy::new(10, 0, movement_pattern, 100)],
         }
     }
 

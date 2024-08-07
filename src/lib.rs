@@ -1,5 +1,3 @@
-use std::ops::{Add, Div, Shr};
-
 mod enemy;
 pub mod game;
 mod player;
