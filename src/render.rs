@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 use std::io::stdout;
+=======
+use std::io::{stdout, Write};
+>>>>>>> 275f7e6 (Made game loop async and improved RenderBuffer)
 
 use crossterm::{
     cursor, execute,

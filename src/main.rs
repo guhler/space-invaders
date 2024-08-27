@@ -3,7 +3,8 @@ use std::io::stdout;
 use crossterm::{
     cursor,
     event::{self, KeyboardEnhancementFlags},
-    execute, terminal,
+    execute, 
+    terminal,
 };
 use space_invaders::GameState;
 
