@@ -1,10 +1,11 @@
-use std::io::{stdout, Write};
+use std::io::stdout;
 
 use crossterm::{
     cursor, execute,
     style::{StyledContent, Stylize},
     terminal,
 };
+use tokio::io::{self, AsyncWriteExt};
 
 pub struct RenderBuffer {
     buf: Vec<StyledContent<char>>,
@@ -34,14 +35,14 @@ impl RenderBuffer {
         self.buf.get_mut((x + y * self.width) as usize)
     }
 
-    pub fn render(self) {
+    pub async fn render(self) {
         assert_eq!((self.width * self.height) as usize, self.buf.len());
         execute!(stdout(), cursor::MoveTo(0, 0)).unwrap();
         let mut str_buf = String::with_capacity((self.width * self.height) as usize);
         for c in self.buf {
             str_buf += &format!("{}", c);
         }
-        stdout().write_all(str_buf.as_bytes()).unwrap();
+        io::stdout().write_all(str_buf.as_bytes()).await.unwrap();
     }
 }
 
