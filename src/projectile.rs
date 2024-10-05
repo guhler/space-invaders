@@ -34,16 +34,10 @@ impl Projectile {
     pub fn render(&self, buf: &mut RenderBuffer) {
         *buf.get_mut(self.pos.0 as u16, self.pos.1 as u16).unwrap() = match self.vel.1 / self.vel.0
         {
-<<<<<<< HEAD
             -4.0..=-0.5 => '\\',
             -0.5..=0.5 => '-',
             0.5..4.0 => '/',
             _ => '|',
-=======
-            *buffer
-                .get_mut(self.pos.0 as u16, self.pos.1 as u16)
-                .unwrap() = c.stylize();
->>>>>>> 275f7e6 (Made game loop async and improved RenderBuffer)
         }
         .stylize();
     }

@@ -32,7 +32,7 @@ impl GameState {
         let mut input_reader = event::EventStream::new();
         let render = async {
             loop {
-                futures_timer::Delay::new(Duration::from_millis((1000 / Self::FRAME_RATE) as u64))
+                futures_timer::Delay::new(Duration::from_millis(1000 / Self::FRAME_RATE as u64))
                     .await;
                 s.lock().await.render().await;
             }
