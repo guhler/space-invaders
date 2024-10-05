@@ -1,57 +1,44 @@
-use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyEventState};
+use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind};
 
 pub struct InputState {
-    pub left_arrow: bool,
-    pub up_arrow: bool,
-    pub right_arrow: bool,
-    pub down_arrow: bool,
+    pressed: Vec<KeyCode>,
 }
 
 impl InputState {
     pub fn new() -> Self {
         Self {
-            left_arrow: false,
-            up_arrow: false,
-            right_arrow: false,
-            down_arrow: false,
+            pressed: Vec::new(),
         }
     }
 
     pub fn accept(&mut self, event: &Event) -> bool {
         match event {
-            Event::Key(KeyEvent {
-                code: KeyCode::Up,
-                kind,
-                ..
-            }) => {
-                self.up_arrow = *kind == KeyEventKind::Press;
-                true
-            }
-            Event::Key(KeyEvent {
-                code: KeyCode::Right,
-                kind,
-                ..
-            }) => {
-                self.right_arrow = *kind == KeyEventKind::Press;
-                true
-            }
-            Event::Key(KeyEvent {
-                code: KeyCode::Down,
-                kind,
-                ..
-            }) => {
-                self.down_arrow = *kind == KeyEventKind::Press;
-                true
-            }
-            Event::Key(KeyEvent {
-                code: KeyCode::Left,
-                kind,
-                ..
-            }) => {
-                self.left_arrow = *kind == KeyEventKind::Press;
-                true
-            }
+            Event::Key(KeyEvent { code, kind, .. }) => match kind {
+                KeyEventKind::Release => {
+                    debug_assert!(self.pressed.contains(code));
+                    for i in (0..self.pressed.len()).rev() {
+                        if &self.pressed[i] == code {
+                            self.pressed.remove(i);
+                            #[cfg(not(debug_assertions))]
+                            break;
+                        }
+                    }
+                    true
+                }
+                _ => {
+                    if !self.pressed.contains(code) {
+                        self.pressed.push(*code);
+                        true
+                    } else {
+                        false
+                    }
+                }
+            },
             _ => false,
         }
+    }
+
+    pub fn is_pressed(&self, code: &KeyCode) -> bool {
+        self.pressed.contains(&code)
     }
 }

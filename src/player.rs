@@ -1,4 +1,4 @@
-use crossterm::{style::Stylize, terminal};
+use crossterm::{event::KeyCode, style::Stylize, terminal};
 
 use crate::{projectile::Projectile, render::RenderBuffer, GameState};
 
@@ -36,12 +36,18 @@ impl Player {
             .1
             .clamp(0.0, h as f32 - gs.player.shape.len() as f32);
 
-        gs.player.vel.0 = match (gs.input.left_arrow, gs.input.right_arrow) {
+        gs.player.vel.0 = match (
+            gs.input.is_pressed(&KeyCode::Left),
+            gs.input.is_pressed(&KeyCode::Right),
+        ) {
             (true, true) | (false, false) => gs.player.vel.0 * 0.8,
             (true, false) => gs.player.vel.0 - 1.0,
             (false, true) => gs.player.vel.0 + 1.0,
         };
-        gs.player.vel.1 = match (gs.input.up_arrow, gs.input.down_arrow) {
+        gs.player.vel.1 = match (
+            gs.input.is_pressed(&KeyCode::Up),
+            gs.input.is_pressed(&KeyCode::Down),
+        ) {
             (true, true) | (false, false) => gs.player.vel.1 * 0.8,
             (true, false) => gs.player.vel.1 - 1.0,
             (false, true) => gs.player.vel.1 + 1.0,
